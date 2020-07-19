@@ -4,7 +4,6 @@
 Author:- Ajit Jadhav
 
 '''
-from extras import Docs as Database
 import logging
 from bson.json_util import dumps
 import os
@@ -14,16 +13,16 @@ import azure.functions as func
 directory = os.path.dirname(__file__)
 sys.path.insert(0, directory)
 
-
-def get_users(database_name, collection_name, query=''):
-    database_client = Database.Database(database_name)
+from Custom import Docs as document
+def get_users(database_name, collection_name, query={}):
+    database_client = document.Database(database_name)
     users = database_client.fetch_documents(
-        collection_name, {'email': query}, {'_id': 0})
+        collection_name, query, {'_id': 0})
     return users
 
 
 def add_user_data(database_name, collection_name, user_data={}):
-    client = Database.Database(database_name)
+    client = document.Database(database_name)
     if user_data:
         status = client.inject_data('users', user_data)
         return status
@@ -41,9 +40,24 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         return func.HttpResponse(dumps({}), status_code=200, headers=headers)
     if req.method == 'GET':
         params_body = req.params
-        logging.info(params_body)
-        users = get_users('election', 'users', params_body['query'])
-        return func.HttpResponse(dumps({'users': users}), status_code=200, headers=headers)
+        if params_body:
+            logging.info(params_body)
+            users = get_users('election', 'users', params_body)
+            return func.HttpResponse(dumps({'users': users}), status_code=200, headers=headers)
+        else:
+            logging.info(params_body)
+            all_users = get_users('election', 'users')
+            response_data = {}
+            response_data['user_count'] = len(all_users)
+            state_wise_count = {}
+            for user in all_users:
+                if user['birthState'] in state_wise_count:
+                    state_wise_count[user['birthState']] += 1
+                else:
+                    state_wise_count[user['birthState']] = 1
+            response_data['state_wise_count'] = state_wise_count
+            # response_data['users'] = all_users
+            return func.HttpResponse(dumps(response_data), status_code = 200, headers = headers)
     elif req.method == 'POST':
         req_body = req.get_json()
         status = add_user_data('election', 'users', req_body)

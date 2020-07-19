@@ -9,6 +9,7 @@ import pymongo
 import logging
 class Database:
     def __init__(self, database_name):
+        logging.info('========== Database called  ==========')
         self.database = database_name
     
     def connect(self):
@@ -21,14 +22,4 @@ class Database:
         collection = database[collection_name]
         documents = list(collection.find(classifiers, projections))
         return documents
-    
-    def inject_data(self, collection_name, data):
-        client = self.connect()
-        database = client[self.database]
-        collection = database[collection_name]
-        status = collection.insert_one(data)
-        if status:
-            return 'success'
-        else:
-            return 'fail'
                 

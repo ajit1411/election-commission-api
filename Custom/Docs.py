@@ -2,7 +2,7 @@
 """
 Created on Sun Jul 19 00:33:22 2020
 
-@author: Ajit
+@author: Ajit Jadhav
 """
 
 import pymongo
@@ -21,4 +21,14 @@ class Database:
         collection = database[collection_name]
         documents = list(collection.find(classifiers, projections))
         return documents
+    
+    def inject_data(self, collection_name, data):
+        client = self.connect()
+        database = client[self.database]
+        collection = database[collection_name]
+        status = collection.insert_one(data)
+        if status:
+            return 'success'
+        else:
+            return 'fail'
                 
