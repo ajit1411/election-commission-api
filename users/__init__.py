@@ -32,8 +32,8 @@ def add_user_data(database_name, collection_name, user_data={}):
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
     headers = {}
-    headers['Access-Control-Allow-Headers'] = 'http://localhost:3000'
-    headers['Access-Control-Allow-Origin'] = 'http://localhost:3000'
+    headers['Access-Control-Allow-Headers'] = '*'
+    headers['Access-Control-Allow-Origin'] = '*'
     headers['Content-Type'] = 'application/json'
     logging.info('Python HTTP trigger function processed a request.')
     if req.method == 'OPTIONS':
